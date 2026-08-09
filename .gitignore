@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+# data is fully reproducible from free sources: `uv run python -m vrp_alpha.pipeline`
+/data/

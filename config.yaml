@@ -1,0 +1,70 @@
+# Study window: strictly post-COVID-crash
+start: "2020-04-15"
+end: "2025-12-31"
+
+# No data before `start` is ever loaded. The first months are burn-in for the
+# volatility / probability models (expanding-window fits need history), so every
+# strategy is compared over the same period starting here:
+backtest_start: "2020-10-01"
+
+markets:
+  US:
+    name: "S&P 500"
+    index: "^GSPC"
+    currency: USD
+    div_yield: 0.015          # used for total-return equity sleeve and forwards
+    rate_series: DTB3          # FRED, 3m T-bill (discount basis, %)
+    iv_source: vix             # VIX term structure, calibrated to CBOE benchmarks
+    expiry_rule: third_friday
+  EU:
+    name: "Euro Stoxx 50"
+    index: "^STOXX50E"
+    currency: EUR
+    div_yield: 0.030
+    rate_series: ECBESTRVOLWGTTRMDMNRT   # EUR short-term rate
+    iv_source: scaled_vix      # VIX x trailing (RV_EU / RV_US); VSTOXX not freely available
+    expiry_rule: third_friday
+  UK:
+    name: "FTSE 100"
+    index: "^FTSE"
+    currency: GBP
+    div_yield: 0.035
+    rate_series: IUDSOIA       # SONIA
+    iv_source: scaled_vix
+    expiry_rule: third_friday
+  IN:
+    name: "NIFTY 50"
+    index: "^NSEI"
+    currency: INR
+    div_yield: 0.013
+    rate_series: RBI_REPO      # hard-coded RBI policy schedule (see data/rates.py)
+    iv_source: nse_chain       # real NSE option settlement prices
+    expiry_rule: nse_monthly
+
+# GDE-style portfolio
+portfolio:
+  equity_weight: 0.5          # equity sleeve, overwritten with calls
+  call_coverage: 1.0          # calls written per unit of equity held
+  # remaining (1 - equity_weight) is cash collateral, fully securing short puts at strike
+
+costs:
+  # round-trip friction charged on premium when selling (fraction of premium)
+  premium_haircut: 0.03
+  # minimum absolute haircut in index points, per market
+  min_points: {US: 0.10, EU: 0.20, UK: 0.25, IN: 0.50}
+
+optimizer:
+  put_deltas: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+  call_deltas: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50]
+  risk_aversion: 0.02         # score = E[edge] - lambda * CVaR95(payoff); set a priori, sensitivity in report
+  max_itm_prob: 0.35          # hard cap on physical exercise probability
+  erp: 0.03                   # equity risk premium in the physical drift (conservative)
+
+stress:
+  scenarios:
+    - {name: "Mild pullback",       spot: -0.05, vol_mult: 1.3}
+    - {name: "Correction",          spot: -0.10, vol_mult: 1.8}
+    - {name: "Aug-2024 vol shock",  spot: -0.06, vol_mult: 2.5}
+    - {name: "Bear market leg",     spot: -0.20, vol_mult: 2.0}
+    - {name: "Mar-2020 style crash", spot: -0.34, vol_mult: 3.0}
+    - {name: "Melt-up",             spot: 0.10,  vol_mult: 0.8}

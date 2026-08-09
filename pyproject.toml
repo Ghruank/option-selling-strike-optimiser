@@ -1,0 +1,35 @@
+[project]
+name = "option-selling-strike-optimizer"
+version = "0.1.0"
+description = "Option selling strategy optimiser: picks put and covered-call strikes least likely to be exercised (US, EU, UK, India, 2020-2025)"
+readme = "README.md"
+authors = [
+    { name = "Ghruank Kothare", email = "gpkothare_b23@it.vjti.ac.in" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "arch>=8.0.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.3",
+    "pandas>=3.0.6",
+    "plotly>=7.1.0",
+    "pyarrow>=25.0.1",
+    "pyyaml>=6.0.3",
+    "requests>=2.34.2",
+    "scikit-learn>=1.9.1",
+    "scipy>=1.18.1",
+    "streamlit>=1.64.0",
+    "yfinance>=1.7.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.uv.build-backend]
+module-name = "vrp_alpha"
