@@ -4,3 +4,5 @@ __pycache__/
 .pytest_cache/
 # data is fully reproducible from free sources: `uv run python -m vrp_alpha.pipeline`
 /data/
+# private prep notes, kept locally only
+docs/interview_notes.md
